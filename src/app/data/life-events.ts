@@ -304,6 +304,20 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
         category: "travel"
       }
     ],
+    "2026-03-15": [
+      {
+        headline: "🏝️ US Virgin Islands",
+        description: "Travel to the US Virgin Islands",
+        category: "travel"
+      }
+    ],
+    "2026-05-15": [
+      {
+        headline: "🌺 Hawaii",
+        description: "Travel to Hawaii",
+        category: "travel"
+      }
+    ],
     ...(APP_CONFIG.showLifeExpectancy ? {
       [derivedConfig.lifeExpectancyDate]: [
         {
