@@ -318,6 +318,37 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
         category: "travel"
       }
     ],
+    "2025-01-01": [
+      {
+        headline: "📊 Joined AI for Analytics",
+        milestone: true,
+        description: "Built AI agents to boost productivity in analytics at Meta",
+        category: "work"
+      }
+    ],
+    "2025-06-01": [
+      {
+        headline: "🧪 Joined AI for Experimentation",
+        milestone: true,
+        description: "Using AI to help Meta make better and faster decisions through experimentation",
+        category: "work"
+      }
+    ],
+    "2026-03-01": [
+      {
+        headline: "🧭 Became Agent Captain",
+        milestone: true,
+        description: "Leading the shift to AI-native workflows at Meta",
+        category: "work"
+      }
+    ],
+    "2026-06-01": [
+      {
+        headline: "🌉 San Francisco",
+        description: "Extended stay in San Francisco",
+        category: "travel"
+      }
+    ],
     ...(APP_CONFIG.showLifeExpectancy ? {
       [derivedConfig.lifeExpectancyDate]: [
         {
