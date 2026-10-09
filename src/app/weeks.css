@@ -8,7 +8,7 @@
 :root {
   --bg: #FFFFFF; --bg-2: #F5F7FA; --ink: #0B0D12; --ink-2: #353A45; --muted: #646B78;
   --line: #DADDE4; --strong: #0B0D12; --accent: #1E45FF; --on-accent: #FFFFFF; --tint: #EEF2FF; --live: #12B76A;
-  --font: var(--font-archivo), 'Archivo', 'Noto Sans SC', 'PingFang SC', system-ui, sans-serif;
+  --font: 'Archivo', 'Noto Sans SC', 'PingFang SC', system-ui, sans-serif;
   --cjk: 'Noto Sans SC', 'PingFang SC', sans-serif;
   --emoji: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
   --rail: 288px; --gut: clamp(20px, 3vw, 40px);
