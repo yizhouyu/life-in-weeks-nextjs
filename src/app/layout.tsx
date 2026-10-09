@@ -1,15 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 
-// Display + body face shared with yizhouyu.dev ("E · Bright Grid").
-// Variable font with the width axis so the display type can run slightly wide.
-const archivo = Archivo({
-  subsets: ["latin"],
-  axes: ["wdth"],
-  display: "swap",
-  variable: "--font-archivo",
-});
+// Display + body face shared with yizhouyu.dev ("E · Bright Grid"), loaded from Google Fonts by absolute URL.
+// Not next/font: in production /weeks is proxied under yizhouyu.dev, and the self-hosted font's
+// root-relative /_next/ URL inside the CSS resolves to the main site (GitHub Pages) and 404s.
+const ARCHIVO_CSS = "https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&display=swap";
 
 // YZY palindrome favicon, identical to the main site's.
 const YZY_FAVICON =
@@ -61,9 +56,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={archivo.variable} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="stylesheet" href={ARCHIVO_CSS} />
       </head>
       <body>
         {children}
