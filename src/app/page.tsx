@@ -44,11 +44,15 @@ export default function HomePage() {
   // Create weeks configuration
   const weeksConfig = createWeeksConfig(sensitiveDates.birthDate, derivedConfig)
 
+  // The client swaps this for the visitor's clock right after hydration
+  const renderedAt = Date.now()
+
   return (
     <LifeWeeksClient 
       lifeEvents={lifeEvents}
       weeksConfig={weeksConfig}
       derivedConfig={derivedConfig}
+      renderedAt={renderedAt}
     />
   )
 }

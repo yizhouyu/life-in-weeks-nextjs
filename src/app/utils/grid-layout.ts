@@ -11,6 +11,8 @@ export interface GridBox {
   age?: number
   year?: number
   eventType?: 'personal' | 'world' | 'president'  // Type of event for styling
+  milestone?: boolean                              // Primary event starts a new life phase
+  headline?: string                                // Primary event's full headline (tooltip title)
 }
 
 export interface RowBreakCalculation {
@@ -108,33 +110,23 @@ export function calculateDynamicConstants(containerWidth: number, compactMode: b
   let basePadding: number
   let weekBoxMinWidth: number
   
+  // Metrics mirror weeks.css (Archivo, uppercase-free labels). Slight over-estimates are
+  // safe: plain week cells flex to absorb any leftover width in a row.
   if (compactMode) {
-    // Compact mode: match CSS font-size constraints
-    if (containerWidth <= 480) {
-      charWidth = 7   // CSS: font-size: 7px
-      basePadding = 2 // CSS: padding: 0px 2px = 4px total
-      weekBoxMinWidth = 14 // CSS: 8px min-width + 4px padding + 2px borders
-    } else if (containerWidth <= 768) {
-      charWidth = 8   // CSS: font-size: 8px
-      basePadding = 2 // CSS: padding: 0px 2px = 4px total
-      weekBoxMinWidth = 14 // CSS: 8px min-width + 4px padding + 2px borders
-    } else {
-      charWidth = 10  // CSS: font-size: 12px (desktop compact)
-      basePadding = 2 // CSS: padding: 0px 2px = 4px total
-      weekBoxMinWidth = 16 // Slightly larger for desktop
-    }
+    charWidth = containerWidth <= 768 ? 6.5 : 7   // emoji ~ 2 UTF-16 units → ~13–14px
+    basePadding = 2
+    weekBoxMinWidth = 6
   } else {
-    // Normal mode: existing logic (working fine)
     if (containerWidth < 350) {
-      charWidth = 5  // Extra small mobile
+      charWidth = 6     // 10px labels
     } else if (containerWidth < 500) {
-      charWidth = 6  // Mobile
+      charWidth = 6.5   // 11px labels
     } else if (containerWidth < 650) {
-      charWidth = 7  // Tablet
+      charWidth = 7     // 12px labels
     } else {
-      charWidth = 8  // Desktop and larger
+      charWidth = 7.4   // 12.5px labels
     }
-    basePadding = Math.max(2, Math.min(8, Math.floor(containerWidth / 150)))
+    basePadding = containerWidth >= 650 ? 8 : 5
     weekBoxMinWidth = Math.max(12, Math.min(20, Math.floor(containerWidth / 50)))
   }
   
@@ -197,20 +189,14 @@ export function getResponsiveConstants(compactMode: boolean = false, measuredWid
  * Calculate the absolute pixel width for empty week cells
  */
 export function calculateWeekCellWidth(compactMode: boolean = false): number {
-  const borderWidth = 2  // 1px border on each side
-  const gapWidth = 1     // 1px gap between cells
-  
   if (compactMode) {
-    // Compact mode: squeeze empty cells to 9px total
-    // 4px content + 2px padding + 2px borders + 1px gap = 9px
-    return 4 + 2 + borderWidth + gapWidth  // Ultra-compressed empty cells
-  } else {
-    // Normal mode: square cells (width = total CSS height)
-    // Use viewport width, not container width, to match CSS media queries
-    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200
-    // Mobile (≤768px viewport): 18px total, Desktop/Tablet (>768px): 26px total
-    return viewportWidth <= 768 ? 18 : 26
+    // Compact: 6px cell + 1px gap — the whole life fits on one screen
+    return 7
   }
+  // Standard: near-square cells. Use viewport width to match CSS media queries.
+  // Desktop: 22px cell + 2px gap; mobile (≤768px viewport): 16px cell + 2px gap.
+  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200
+  return viewportWidth <= 768 ? 18 : 24
 }
 
 /**
@@ -223,10 +209,10 @@ export function calculateBoxWidth(label: string, compactMode: boolean = false, m
   // Calculate width as: padding + (characters * char width) + padding + border + gap
   const textWidth = labelLength * constants.charWidth
   const totalPadding = constants.basePadding * 2  // Left + right padding
-  const borderWidth = 2  // 1px border on each side
-  const gapWidth = 1     // 1px gap between cells
+  const borderWidth = 2                  // 1px hairline on each side
+  const gapWidth = compactMode ? 1 : 2   // matches .row-cells gap in weeks.css
   
-  return textWidth + totalPadding + borderWidth + gapWidth
+  return Math.ceil(textWidth + totalPadding + borderWidth + gapWidth)
 }
 
 /**
@@ -393,10 +379,12 @@ function formatTooltipDateLocal(dateString: string, showFullDate: boolean = true
  * Create birthday box label matching Gina's format
  */
 export function createBirthdayLabel(age: number, year: number, compactMode: boolean = false): string {
+  // Rendered as a black-boxed age marker; the calendar year sits in the row gutter
+  // (and in the tooltip), so the label stays short.
   if (compactMode) {
-    return `🎂${age}`
+    return `${age}`
   }
-  return `🎂 ${age} in ${year}`
+  return `Age ${age}`
 }
 
 /**

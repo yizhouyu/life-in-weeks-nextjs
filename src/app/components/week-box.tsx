@@ -49,7 +49,7 @@ export function WeekBox({ box, className = '', style = {}, isCompactMode = false
   // Use custom tooltip for detailed events or compact mode events
   if (shouldUseCustomTooltip) {
     return (
-      <CustomTooltip content={box.tooltip}>
+      <CustomTooltip content={box.tooltip} heading={box.headline}>
         {buttonElement}
       </CustomTooltip>
     )

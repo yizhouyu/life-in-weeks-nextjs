@@ -1,37 +1,83 @@
 'use client'
 
 import React from 'react'
+import { APP_CONFIG } from '../config/app-config'
+import { EventsData, WeeksConfig } from '../data/life-events'
 
 interface IntroContentProps {
-  isCompactMode: boolean
-  setIsCompactMode: (compact: boolean) => void
+  lifeEvents: EventsData
+  weeksConfig: WeeksConfig
+  now: number
 }
 
-export function IntroContent({ isCompactMode, setIsCompactMode }: IntroContentProps) {
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+
+function parseLocalDate(dateString: string): Date {
+  const [y, m, d] = dateString.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
+const fmt = (n: number) => n.toLocaleString('en-US')
+
+export function IntroContent({ lifeEvents, weeksConfig, now }: IntroContentProps) {
+  const start = parseLocalDate(weeksConfig.startDate).getTime()
+  const end = new Date(parseLocalDate(weeksConfig.startDate))
+  end.setFullYear(end.getFullYear() + APP_CONFIG.maxAge)
+
+  const weeksLived = Math.max(0, Math.floor((now - start) / WEEK_MS))
+  const totalWeeks = Math.round((end.getTime() - start) / WEEK_MS)
+  const pct = Math.min(100, Math.round((weeksLived / totalWeeks) * 100))
+  const milestonesPassed = Object.entries(lifeEvents).filter(
+    ([date, events]) => parseLocalDate(date).getTime() <= now && events.some(e => e.milestone)
+  ).length
+  const chapters = milestonesPassed + 1 // the first chapter starts at birth
+
   return (
-    <div className="intro-content">
-      <div className="mt-3">
-        <p>👋 Hi, I&apos;m <a href="https://yizhouyu.github.io">Yizhou Yu</a>. Each week of my life is a little box. <a href="https://yizhouyu.dev" style={{ marginLeft: '0.5rem' }}>← Back to main site</a></p>
-
-        <p>💡 Inspired by <a href="https://waitbutwhy.com/2014/05/life-weeks.html">Wait But Why</a>. Adapted from <a href="https://github.com/ginatrapani/life-in-weeks">Gina&apos;s work</a>.<br/>
-        💻 Built with <a href="https://rd.me/weeks">Ran Ding&apos;s</a> <a href="https://github.com/dingran/life-in-weeks-nextjs">open-source code</a>. My fork is <a href="https://github.com/yizhouyu/life-in-weeks-nextjs">here</a>.</p>
-
-        <p style={{ fontSize: '0.9em', color: '#666', marginTop: '0.75rem' }}>
-          🎨 <strong>Colors:</strong> Background colors change at major life milestones, marking different life phases.<br/>
-          🌍 <strong>World events:</strong> Notable historical moments (disasters, technology launches, politics) appear as overlays.
+    <section className="hero" aria-labelledby="weeks-title">
+      <div className="hero-main">
+        <div className="sec-top"><span className="n">01</span><span className="cap">Life in weeks</span></div>
+        <h1 className="d" id="weeks-title">
+          <span className="row">My life</span>
+          <span className="row">in weeks<span className="dot">.</span></span>
+        </h1>
+        <p className="lede">
+          Each week of my life is a little box. <b>{fmt(weeksLived)}</b> of them are filled in so far. The shade
+          deepens at every milestone, so each tone is a chapter.
         </p>
+        <p className="credits">
+          Inspired by <a className="lnk" href="https://waitbutwhy.com/2014/05/life-weeks.html">Wait But Why</a>.
+          Adapted from <a className="lnk" href="https://github.com/ginatrapani/life-in-weeks">Gina&apos;s work</a>.
+          Built with <a className="lnk" href="https://rd.me/weeks">Ran Ding&apos;s</a>{' '}
+          <a className="lnk" href="https://github.com/dingran/life-in-weeks-nextjs">open-source code</a>; my fork
+          is <a className="lnk" href="https://github.com/yizhouyu/life-in-weeks-nextjs">here</a>.
+        </p>
+        <div className="btns">
+          <a className="btn primary" href="#decade-0">See the weeks <span className="arrow" aria-hidden="true">↓</span></a>
+          <a className="btn" href="https://yizhouyu.dev/">Main site <span className="arrow" aria-hidden="true">→</span></a>
+        </div>
       </div>
-      
-      <div className="compact-toggle" style={{ textAlign: 'center', marginTop: '0.75rem', marginBottom: '0.5rem' }}>
-        <button
-          type="button"
-          onClick={() => setIsCompactMode(!isCompactMode)}
-          className={`toggle-button ${isCompactMode ? 'compact-active' : 'standard-active'}`}
-          title={isCompactMode ? 'Switch to Standard View' : 'Switch to Compact View (fits entire life on screen)'}
-        >
-          {isCompactMode ? '📋 Switch to Standard View' : '🔍 Switch to Compact View'}
-        </button>
-      </div>
-    </div>
+
+      <aside className="rail" aria-label="By the numbers">
+        <span className="cap">By the numbers</span>
+        <ul className="proof">
+          <li>
+            <span className="i">01</span>
+            <span className="v" data-weeks-live>{fmt(weeksLived)}</span>
+            <span className="l">Weeks lived, counted live</span>
+          </li>
+          <li>
+            <span className="i">02</span>
+            <span className="v">{pct}<small>%</small></span>
+            <span className="l">Of {fmt(totalWeeks)} weeks to age {APP_CONFIG.maxAge}</span>
+          </li>
+          <li>
+            <span className="i">03</span>
+            <span className="v">{chapters}</span>
+            <span className="l">Chapters so far, one shade each</span>
+          </li>
+        </ul>
+        <p className="now"><i aria-hidden="true" /> This week is the outlined square in the grid.</p>
+      </aside>
+    </section>
   )
 }

@@ -53,110 +53,88 @@ export function EventFilter({ filters, setFilters }: EventFilterProps) {
     })
   }
 
+  const mainChips: Array<{ key: 'showPersonalEvents' | 'showWorldEvents' | 'showPresidents'; label: string }> = [
+    { key: 'showPersonalEvents', label: 'Personal events' },
+    { key: 'showWorldEvents', label: 'World events' },
+    { key: 'showPresidents', label: 'US presidents' },
+  ]
+  const categoryChips: Array<{ key: keyof EventFilters['personalCategories']; label: string }> = [
+    { key: 'personal', label: 'Personal' },
+    { key: 'education', label: 'Education' },
+    { key: 'work', label: 'Work' },
+    { key: 'travel', label: 'Travel' },
+    { key: 'achievement', label: 'Achievements' },
+  ]
+
   return (
-    <div className="event-filter">
-      <div className="filter-section">
-        <div className="filter-label">Event Filters:</div>
+    <section className="event-filter" aria-labelledby="filters-h">
+      <div className="sec-top"><span className="n">02</span><span className="cap" id="filters-h">Filter the overlays</span></div>
 
+      <div className="filter-rows">
         {/* Main event type toggles */}
-        <div className="filter-buttons">
-          <label className={`filter-chip ${filters.showPersonalEvents ? 'active' : ''}`}>
-            <input
-              type="checkbox"
-              checked={filters.showPersonalEvents}
-              onChange={() => toggleMainFilter('showPersonalEvents')}
-              className="filter-checkbox"
-            />
-            <span className="filter-chip-text">Personal Events</span>
-          </label>
+        <div className="filter-row">
+          <span className="filter-label">Show</span>
+          <div className="filter-buttons">
+            {mainChips.map(({ key, label }) => (
+              <label key={key} className={`filter-chip ${filters[key] ? 'active' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={filters[key]}
+                  onChange={() => toggleMainFilter(key)}
+                  className="filter-checkbox"
+                />
+                <i className="sq" aria-hidden="true" />
+                <span className="filter-chip-text">{label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
 
-          <label className={`filter-chip ${filters.showWorldEvents ? 'active' : ''}`}>
-            <input
-              type="checkbox"
-              checked={filters.showWorldEvents}
-              onChange={() => toggleMainFilter('showWorldEvents')}
-              className="filter-checkbox"
-            />
-            <span className="filter-chip-text">World Events</span>
-          </label>
+        {/* Personal event category filters - only show when personal events are enabled */}
+        {filters.showPersonalEvents && (
+          <div className="filter-row category-section">
+            <span className="filter-label">Categories</span>
+            <div className="filter-buttons">
+              {categoryChips.map(({ key, label }) => (
+                <label key={key} className={`filter-chip category-chip ${filters.personalCategories[key] ? 'active' : ''}`}>
+                  <input
+                    type="checkbox"
+                    checked={filters.personalCategories[key]}
+                    onChange={() => toggleCategoryFilter(key)}
+                    className="filter-checkbox"
+                  />
+                  <i className="sq" aria-hidden="true" />
+                  <span className="filter-chip-text">{label}</span>
+                </label>
+              ))}
+              <button
+                type="button"
+                onClick={toggleAllPersonalCategories}
+                className="select-all-btn"
+              >
+                {allPersonalCategoriesEnabled ? 'Deselect all' : 'Select all'}
+              </button>
+            </div>
+          </div>
+        )}
 
-          <label className={`filter-chip ${filters.showPresidents ? 'active' : ''}`}>
-            <input
-              type="checkbox"
-              checked={filters.showPresidents}
-              onChange={() => toggleMainFilter('showPresidents')}
-              className="filter-checkbox"
-            />
-            <span className="filter-chip-text">US Presidents</span>
-          </label>
+        {/* Key */}
+        <div className="filter-row legend-row">
+          <span className="filter-label">Key</span>
+          <ul className="legend">
+            <li className="legend-item legend-ramp">
+              <span className="ramp" aria-hidden="true">
+                {Array.from({ length: 9 }, (_, i) => <i key={i} style={{ background: `var(--phase-${i})` }} />)}
+              </span>
+              Chapters, deepening at each milestone
+            </li>
+            <li className="legend-item"><i className="k k-now" aria-hidden="true" />This week</li>
+            <li className="legend-item"><i className="k k-future" aria-hidden="true" />Still ahead</li>
+            <li className="legend-item"><i className="k k-ms" aria-hidden="true" />Milestone</li>
+            <li className="legend-item"><i className="k k-world" aria-hidden="true" />World event</li>
+          </ul>
         </div>
       </div>
-
-      {/* Personal event category filters - only show when personal events are enabled */}
-      {filters.showPersonalEvents && (
-        <div className="filter-section category-section">
-          <div className="category-header">
-            <span className="filter-label">Personal Event Categories:</span>
-            <button
-              onClick={toggleAllPersonalCategories}
-              className="select-all-btn"
-            >
-              {allPersonalCategoriesEnabled ? 'Deselect All' : 'Select All'}
-            </button>
-          </div>
-          <div className="filter-buttons">
-            <label className={`filter-chip category-chip ${filters.personalCategories.personal ? 'active' : ''}`}>
-              <input
-                type="checkbox"
-                checked={filters.personalCategories.personal}
-                onChange={() => toggleCategoryFilter('personal')}
-                className="filter-checkbox"
-              />
-              <span className="filter-chip-text">Personal</span>
-            </label>
-
-            <label className={`filter-chip category-chip ${filters.personalCategories.education ? 'active' : ''}`}>
-              <input
-                type="checkbox"
-                checked={filters.personalCategories.education}
-                onChange={() => toggleCategoryFilter('education')}
-                className="filter-checkbox"
-              />
-              <span className="filter-chip-text">Education</span>
-            </label>
-
-            <label className={`filter-chip category-chip ${filters.personalCategories.work ? 'active' : ''}`}>
-              <input
-                type="checkbox"
-                checked={filters.personalCategories.work}
-                onChange={() => toggleCategoryFilter('work')}
-                className="filter-checkbox"
-              />
-              <span className="filter-chip-text">Work</span>
-            </label>
-
-            <label className={`filter-chip category-chip ${filters.personalCategories.travel ? 'active' : ''}`}>
-              <input
-                type="checkbox"
-                checked={filters.personalCategories.travel}
-                onChange={() => toggleCategoryFilter('travel')}
-                className="filter-checkbox"
-              />
-              <span className="filter-chip-text">Travel</span>
-            </label>
-
-            <label className={`filter-chip category-chip ${filters.personalCategories.achievement ? 'active' : ''}`}>
-              <input
-                type="checkbox"
-                checked={filters.personalCategories.achievement}
-                onChange={() => toggleCategoryFilter('achievement')}
-                className="filter-checkbox"
-              />
-              <span className="filter-chip-text">Achievements</span>
-            </label>
-          </div>
-        </div>
-      )}
-    </div>
+    </section>
   )
 }

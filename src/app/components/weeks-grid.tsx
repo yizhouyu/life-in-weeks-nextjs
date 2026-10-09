@@ -3,7 +3,7 @@
 // WeeksGrid Component - Main grid with exact row-breaking algorithm
 // Matches Gina's life-in-weeks.html logic exactly
 
-import React, { useState, useEffect, useRef, useCallback, forwardRef } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, forwardRef } from 'react'
 import { EventsData, WeeksConfig } from '../data/life-events'
 import { worldEvents } from '../data/world-events'
 import { usPresidents } from '../data/us-presidents'
@@ -92,10 +92,26 @@ interface WeeksGridProps {
   lifeEvents: EventsData
   weeksConfig: WeeksConfig
   filters: EventFilters
+  now: number
+}
+
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+
+// useLayoutEffect warns during SSR; fall back to useEffect on the server.
+const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
+// Year gutter on the left of every row (label + gap), in px. Mirrored by --gutter in CSS.
+function gutterFor(width: number): number {
+  return width < 560 ? 30 : 48
+}
+
+function parseLocalDate(dateString: string): Date {
+  const [y, m, d] = dateString.split('-').map(Number)
+  return new Date(y, m - 1, d)
 }
 
 export const WeeksGrid = forwardRef<HTMLDivElement, WeeksGridProps>(
-  function WeeksGrid({ isCompactMode, lifeEvents, weeksConfig, filters }, ref) {
+  function WeeksGrid({ isCompactMode, lifeEvents, weeksConfig, filters, now }, ref) {
   const [containerWidth, setContainerWidth] = useState<number>(0)
   const gridContainerRef = useRef<HTMLDivElement>(null)
   
@@ -133,13 +149,12 @@ export const WeeksGrid = forwardRef<HTMLDivElement, WeeksGridProps>(
     }
   }, [measureContainer])
   
-  // Also measure when compact mode changes
-  useEffect(() => {
+  // Also measure when compact mode changes (before paint on the client)
+  useIsoLayoutEffect(() => {
     measureContainer()
   }, [isCompactMode, measureContainer])
   
   const startDate = new Date(weeksConfig.startDate)
-  const currentDate = new Date()
   
   // Generate milestone colors from the life events
   const milestoneColors = generateMilestoneColors(lifeEvents)
@@ -286,7 +301,9 @@ export const WeeksGrid = forwardRef<HTMLDivElement, WeeksGridProps>(
             backgroundClass: 'custom-color', // We'll apply inline styles
             age: weekAge,
             year,
-            eventType: primaryEvent.eventType // Use primary event type for styling
+            eventType: primaryEvent.eventType, // Use primary event type for styling
+            milestone: primaryEvent.eventType === 'personal' && !!primaryEvent.milestone,
+            headline: primaryEvent.headline
           }
           
           allBoxes.push(eventBox)
@@ -369,9 +386,16 @@ export const WeeksGrid = forwardRef<HTMLDivElement, WeeksGridProps>(
     boxColorMap.set(box.date, currentBoxColor)
   }
   
-  // Process all boxes together to get proper row numbering with dynamic container width
-  const allRows = processBoxesIntoRows(allBoxes, isCompactMode, containerWidth > 0 ? containerWidth : undefined)
-  
+  // Process all boxes together to get proper row numbering with dynamic container width.
+  // Rows are only laid out once the container has been measured on the client, so the
+  // server HTML and the hydrating render agree (no layout guess from window size).
+  const gutter = gutterFor(containerWidth)
+  const cellsWidth = containerWidth - gutter
+  const allRows = containerWidth > 0 ? processBoxesIntoRows(allBoxes, isCompactMode, cellsWidth) : []
+
+  let lastYearLabel = -1
+  const seenDecades = new Set<number>()
+
   return (
     <div 
       ref={(el) => {
@@ -384,32 +408,68 @@ export const WeeksGrid = forwardRef<HTMLDivElement, WeeksGridProps>(
           }
         }
       }}
-      className={`weeks-grid-container ${isCompactMode ? 'compact-mode' : ''}`}
+      className={`weeks-grid-container ${isCompactMode ? 'compact-mode' : 'standard-mode'} ${containerWidth > 0 ? 'is-ready' : ''}`}
+      style={{ '--gutter': `${gutter}px` } as React.CSSProperties}
     >
-      {allRows.map((row, globalRowIndex) => (
-        <div key={`row-${globalRowIndex}`} className="row-wrapper">
-          {row.map((box, boxIndex) => {
-            const boxDate = new Date(box.date)
-            const isFuture = boxDate > currentDate
-            const backgroundColor = isFuture ? '#f0f0f0' : (boxColorMap.get(box.date) || milestoneColors[0])
-            
-            const combinedStyles: React.CSSProperties = {
-              backgroundColor,
-              border: '1px solid #ccc'
-            }
-            
-            return (
-              <WeekBox
-                key={`${box.date}-${boxIndex}`}
-                box={box}
-                className={isFuture ? 'future-date' : ''}
-                style={combinedStyles}
-                isCompactMode={isCompactMode}
-              />
-            )
-          })}
-        </div>
-      ))}
+      {allRows.map((row, globalRowIndex) => {
+        // Year gutter: calendar year of the row's first week, shown when it changes
+        const firstYear = parseLocalDate(row[0].date).getFullYear()
+        const showYear = firstYear !== lastYearLabel
+        if (showYear) lastYearLabel = firstYear
+
+        // Decade anchors for the sticky nav: first row, then each row holding a 10th birthday
+        let anchorId: string | undefined
+        if (globalRowIndex === 0) {
+          anchorId = 'decade-0'
+          seenDecades.add(0)
+        } else {
+          const decadeBirthday = row.find(b => b.type === 'birthday' && b.age !== undefined && b.age % 10 === 0 && !seenDecades.has(b.age))
+          if (decadeBirthday?.age !== undefined) {
+            anchorId = `decade-${decadeBirthday.age}`
+            seenDecades.add(decadeBirthday.age)
+          }
+        }
+        // Ages ascend along a row; the last box's age makes a decade row count as that decade
+        const rowAge = row[row.length - 1].age ?? row[0].age ?? 0
+
+        return (
+          <div
+            key={`row-${globalRowIndex}`}
+            id={anchorId}
+            className="row-wrapper"
+            data-age={rowAge}
+          >
+            <span className={`row-year ${showYear ? '' : 'is-blank'} ${firstYear % 5 === 0 ? 'is-5' : ''}`} aria-hidden={!showYear}>
+              {showYear ? firstYear : ''}
+            </span>
+            <div className="row-cells">
+              {row.map((box, boxIndex) => {
+                const boxStart = parseLocalDate(box.date).getTime()
+                const isFuture = boxStart > now
+                const isNow = box.type !== 'birthday' && boxStart <= now && now < boxStart + WEEK_MS
+                const phase = boxColorMap.get(box.date) || milestoneColors[0] || 'var(--phase-0)'
+
+                const classes = [
+                  isFuture ? 'future-date' : 'lived',
+                  isNow ? 'is-now' : '',
+                  box.eventType ? `ev-${box.eventType}` : '',
+                  box.milestone ? 'is-milestone' : '',
+                ].filter(Boolean).join(' ')
+
+                return (
+                  <WeekBox
+                    key={`${box.date}-${boxIndex}`}
+                    box={box}
+                    className={classes}
+                    style={{ '--ph': phase } as React.CSSProperties}
+                    isCompactMode={isCompactMode}
+                  />
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 })

@@ -42,21 +42,27 @@ yarn start
 
 ## Branding & Favicon
 
-**Favicon Standard**: All pages in this project use the YY logo favicon matching the main site (yizhouyu.dev):
+**Design system**: the app matches yizhouyu.dev's "E · Bright Grid" look: white field, near-black ink (`#0B0D12`), cobalt accent (`#1E45FF`), hairline cell borders (`#DADDE4`), Archivo (loaded with `next/font/google` in [layout.tsx](src/app/layout.tsx), variable `wdth` axis) with 900-weight, slightly wide (`font-stretch: 112%`) uppercase display type. All tokens live at the top of [weeks.css](src/app/weeks.css) and have dark-mode values.
+
+**Wordmark**: the YZY palindrome mark ([yzy-mark.tsx](src/app/components/yzy-mark.tsx)) sits in the nav and footer and links to `https://yizhouyu.dev/`. The Z is cobalt; on load/hover the two Ys swap places.
+
+**Favicon standard**: every page uses the YZY favicon, identical to the main site's (cobalt rounded square, white stroked "YZY"):
 
 ```typescript
 // In any layout.tsx or page metadata
 export const metadata: Metadata = {
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%233b82f6'/><stop offset='100%25' style='stop-color:%231e40af'/></linearGradient></defs><rect width='100' height='100' rx='20' fill='url(%23grad)'/><text x='50' y='70' font-family='system-ui,sans-serif' font-size='55' font-weight='bold' fill='white' text-anchor='middle'>YY</text></svg>",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231E45FF'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='square'%3E%3Cpath d='M4.5 8.5 8 15.5 11.5 8.5M8 15.5V23.5'/%3E%3Cpath d='M13.5 8.5h6l-6 15h6'/%3E%3Cpath d='M20.5 8.5 24 15.5 27.5 8.5M24 15.5V23.5'/%3E%3C/g%3E%3C/svg%3E",
   },
   // ... other metadata
 }
 ```
 
-**Design**: Blue gradient (#3b82f6 → #1e40af) with white "YY" text and rounded corners (rx=20).
+Don't add `src/app/favicon.ico` or `icon.*` files; the file convention would override the data URI.
 
-**When to use**: Any new page or route added to the project should include this favicon configuration in its metadata to maintain consistent branding across all pages.
+**Theme**: light by default, dark follows the system and can be toggled. Same semantics as the main site (same origin): `data-theme="light|dark"` on `<html>`, persisted in `localStorage['theme']`, with `?theme=light|dark` as an override for screenshots. A tiny inline script in [layout.tsx](src/app/layout.tsx) applies it before paint; [theme-toggle.tsx](src/app/components/theme-toggle.tsx) is the button.
+
+**Copy**: don't mention yzyzy.dev in visible copy.
 
 ## Architecture Overview
 
@@ -103,7 +109,7 @@ weeks-grid.tsx → week-box.tsx
 
 ### Key Architectural Concepts
 
-1. **Milestone System**: Events marked with `milestone: true` automatically receive unique background colors through [milestone-colors.ts](src/app/utils/milestone-colors.ts). Colors are generated chronologically without manual color mapping.
+1. **Milestone System**: Events marked with `milestone: true` automatically start a new life phase through [milestone-colors.ts](src/app/utils/milestone-colors.ts): each milestone steps one shade deeper along the cobalt-grey `--phase-N` ramp in weeks.css. Assigned chronologically, no manual color mapping.
 
 2. **Responsive Grid System**: [grid-layout.ts](src/app/utils/grid-layout.ts) implements pixel-perfect responsive calculations:
    - Dynamic container width measurement
@@ -114,7 +120,7 @@ weeks-grid.tsx → week-box.tsx
 
 3. **Compact Mode**: When enabled, entire life fits on screen:
    - Emoji-only display for events
-   - Compressed cell dimensions (4-8px vs 18-26px)
+   - Compressed cell dimensions (6px vs 16-22px wide)
    - Events without emojis are hidden
    - Automatic emoji extraction from headlines
 
@@ -147,9 +153,13 @@ src/app/
 │   ├── weeks-grid.tsx          # Grid layout & decade sections
 │   ├── week-box.tsx            # Individual week cell
 │   ├── custom-tooltip.tsx      # Rich tooltip with link extraction
-│   ├── sticky-header.tsx       # Decade navigation
-│   ├── compact-toggle.tsx      # Compact mode switcher
-│   ├── intro-content.tsx       # Page header
+│   ├── site-nav.tsx            # Top nav (YZY wordmark, links, theme toggle)
+│   ├── yzy-mark.tsx            # YZY palindrome wordmark
+│   ├── theme-toggle.tsx        # Light/dark toggle (localStorage 'theme')
+│   ├── sticky-header.tsx       # Sticky decade bar + view switch
+│   ├── compact-toggle.tsx      # Standard/Compact segmented control
+│   ├── event-filter.tsx        # Overlay/category filter chips + key
+│   ├── intro-content.tsx       # Hero (title, live weeks-lived count, stats)
 │   └── footer.tsx              # Page footer
 ├── page.tsx                    # Server component entry point
 ├── layout.tsx                  # Root layout with metadata
@@ -191,13 +201,17 @@ showPersonalEventDates: false  // false = month/year only, true = full dates
 
 ## Styling Approach
 
-All styles are in [weeks.css](src/app/weeks.css). No CSS modules or styled-components.
+All styles are in [weeks.css](src/app/weeks.css). No CSS modules or styled-components (Tailwind is installed but unused; `globals.css` is not imported).
 
 **Key CSS patterns**:
-- Responsive breakpoints match GRID_CONSTANTS in [grid-layout.ts](src/app/utils/grid-layout.ts)
-- Compact mode uses separate CSS classes (`.compact-grid`, `.compact-box`)
-- Mobile-first media queries: `320px → 480px → 768px → 1024px → 1400px → 1800px`
-- Box sizing: borders included in width calculations
+- Tokens on `:root` with dark overrides under `@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) }` and `:root[data-theme="dark"]`
+- Life phases are a single cobalt-grey ramp, `--phase-0` … `--phase-10`; [milestone-colors.ts](src/app/utils/milestone-colors.ts) returns `var(--phase-N)` and each cell gets it as `--ph`
+- Cell metrics are CSS vars (`--cell-w`, `--cell-h`, `--cell-gap`, `--chip-fs`, `--chip-px`) that must stay in sync with the estimates in [grid-layout.ts](src/app/utils/grid-layout.ts) (`calculateWeekCellWidth`, `calculateDynamicConstants`)
+- Week cells stay near-square (`max-width: --cell-w × --cell-grow`); event chips absorb the leftover row width
+- Each row has a year gutter (`--gutter`, set inline by [weeks-grid.tsx](src/app/components/weeks-grid.tsx)) and rows holding a 10th birthday carry the `decade-N` anchors used by the sticky decade bar
+- Compact mode is `.compact-mode` on the grid container (6px cells, emoji chips)
+- The current week is `.is-now` (cobalt ring + slow pulse); all animation is disabled under `prefers-reduced-motion`
+- Grid rows render only after the container is measured on the client, so SSR and hydration agree
 
 ## Testing Local Changes
 
@@ -239,8 +253,8 @@ Modify [grid-layout.ts](src/app/utils/grid-layout.ts):
 ### Modifying Milestone Colors
 
 [milestone-colors.ts](src/app/utils/milestone-colors.ts):
-- `COLOR_PALETTE`: First 20 colors (can extend array)
-- `generateHSLColor()`: Auto-generates colors beyond palette
+- Returns `var(--phase-N)`; the actual colours (light + dark) are `--phase-0` … `--phase-10` at the top of weeks.css
+- Phases past the end of the ramp hold the deepest shade
 - Colors are assigned chronologically to events with `milestone: true`
 
 ## Deployment Notes

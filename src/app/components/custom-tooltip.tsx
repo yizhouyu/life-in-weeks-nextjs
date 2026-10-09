@@ -1,94 +1,103 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 interface CustomTooltipProps {
   content: string
+  heading?: string      // Event headline, shown as the tooltip title
   hasDetails?: boolean  // Optional for backward compatibility
   children: React.ReactNode
 }
 
-export function CustomTooltip({ content, children }: CustomTooltipProps) {
+const GAP = 10      // distance between cell and tooltip
+const MARGIN = 10   // keep this far from the viewport edges
+
+// useLayoutEffect warns during SSR; fall back to useEffect on the server.
+const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
+/** Split "Aug 2016 – text\n🌍 more" into a date line and one entry per event. */
+function parseContent(text: string): { date: string | null; entries: string[] } {
+  const i = text.indexOf(' – ')
+  if (i === -1) return { date: text, entries: [] }
+  return {
+    date: text.slice(0, i),
+    entries: text.slice(i + 3).split('\n').filter(Boolean),
+  }
+}
+
+// Format text with clickable links
+function formatContent(text: string) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g
+  const parts = text.split(urlRegex)
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="lnk"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
+        </a>
+      )
+    }
+    return <span key={index}>{part}</span>
+  })
+}
+
+/** Tag for an entry, from the prefix added in weeks-grid (🌍 world, 🇺🇸 president). */
+function entryKind(entry: string): { kind: 'world' | 'president' | 'personal'; text: string } {
+  if (entry.startsWith('🌍 ')) return { kind: 'world', text: entry.slice(3) }
+  if (entry.startsWith('🇺🇸 ')) return { kind: 'president', text: entry.slice(5) }
+  return { kind: 'personal', text: entry }
+}
+
+const KIND_LABEL = { world: 'World', president: 'US president', personal: 'Personal' } as const
+
+export function CustomTooltip({ content, heading, children }: CustomTooltipProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isSticky, setIsSticky] = useState(false)
-  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [anchor, setAnchor] = useState<DOMRect | null>(null)
+  const [position, setPosition] = useState<{ x: number; y: number; ax: number; below: boolean } | null>(null)
   const triggerRef = useRef<HTMLElement>(null)
-  const tooltipId = useRef(`tooltip-${Math.random().toString(36).substr(2, 9)}`)
+  const tipRef = useRef<HTMLDivElement>(null)
+  const tooltipId = useRef(`tooltip-${Math.random().toString(36).slice(2, 11)}`)
 
   const isVisible = isHovered || isSticky
 
-  // Calculate tooltip position
-  const updatePosition = (rect: DOMRect) => {
-    const tooltipWidth = 300 // Reduced max width for closer positioning
-    
-    // Get actual tooltip height by measuring existing tooltip or creating temporary one
-    const getActualHeight = () => {
-      const existingTooltip = document.getElementById(tooltipId.current)
-      if (existingTooltip) {
-        return existingTooltip.offsetHeight
-      }
-      
-      // Create temporary tooltip to measure height
-      const temp = document.createElement('div')
-      temp.style.position = 'absolute'
-      temp.style.visibility = 'hidden'
-      temp.style.pointerEvents = 'none'
-      temp.style.left = '-9999px'
-      temp.style.top = '-9999px'
-      temp.style.backgroundColor = 'rgba(0, 0, 0, 0.9)'
-      temp.style.color = 'white'
-      temp.style.fontFamily = "'Red Hat Display', system-ui, -apple-system, sans-serif"
-      temp.style.fontSize = '13px'
-      temp.style.fontWeight = '500'
-      temp.style.borderRadius = '6px'
-      temp.style.padding = '12px 16px'
-      temp.style.maxWidth = `${tooltipWidth}px`
-      temp.style.minWidth = '150px'
-      temp.style.wordWrap = 'break-word'
-      temp.style.lineHeight = '1.5'
-      temp.innerHTML = `<div style="white-space: pre-wrap; word-break: break-word;">${content}</div>`
-      
-      document.body.appendChild(temp)
-      const height = temp.offsetHeight
-      document.body.removeChild(temp)
-      
-      return height
-    }
-    
-    const tooltipHeight = getActualHeight()
-    
-    // Position so bottom of tooltip is just above top of cell
-    let x = rect.left + rect.width / 2 - tooltipWidth / 2 // Center horizontally on cell
-    let y = rect.top - tooltipHeight - 5 // Bottom of tooltip 5px above cell top
-    
-    // Keep within viewport horizontally
-    if (x < 10) x = 10
-    if (x + tooltipWidth > window.innerWidth - 10) {
-      x = window.innerWidth - tooltipWidth - 10
-    }
-    
-    // If no space above, show below the cell
-    if (y < 10) {
-      y = rect.bottom + 5 // 5px below the cell
-    }
-    
-    setPosition({ x, y })
+  // Measure the rendered tooltip, then place it centred above the cell (or below if
+  // there is no room), clamped to the viewport.
+  useIsoLayoutEffect(() => {
+    if (!isVisible || !anchor || !tipRef.current) { setPosition(null); return }
+    const w = tipRef.current.offsetWidth
+    const h = tipRef.current.offsetHeight
+    const cx = anchor.left + anchor.width / 2
+    let x = cx - w / 2
+    x = Math.max(MARGIN, Math.min(x, window.innerWidth - w - MARGIN))
+    let y = anchor.top - h - GAP
+    let below = false
+    if (y < MARGIN) { y = anchor.bottom + GAP; below = true }
+    const ax = Math.max(12, Math.min(w - 12, cx - x))
+    setPosition({ x, y, ax, below })
+  }, [isVisible, anchor, content])
+
+  const show = () => {
+    const rect = triggerRef.current?.getBoundingClientRect()
+    if (rect) setAnchor(rect)
   }
 
   const handleMouseEnter = () => {
     if (!content) return
-    
     // Dismiss any existing sticky tooltips globally
-    document.dispatchEvent(new CustomEvent('dismissAllTooltips', { 
-      detail: { except: tooltipId.current } 
+    document.dispatchEvent(new CustomEvent('dismissAllTooltips', {
+      detail: { except: tooltipId.current }
     }))
-    
-    const rect = triggerRef.current?.getBoundingClientRect()
-    if (rect) {
-      updatePosition(rect)
-      setIsHovered(true)
-    }
+    show()
+    setIsHovered(true)
   }
 
   const handleMouseLeave = () => {
@@ -99,16 +108,14 @@ export function CustomTooltip({ content, children }: CustomTooltipProps) {
 
   const handleClick = (e: React.MouseEvent) => {
     if (!content) return
-    
     e.preventDefault()
     e.stopPropagation()
-    
-    const rect = triggerRef.current?.getBoundingClientRect()
-    if (rect) {
-      updatePosition(rect)
-      setIsSticky(true)
-      setIsHovered(true)
-    }
+    document.dispatchEvent(new CustomEvent('dismissAllTooltips', {
+      detail: { except: tooltipId.current }
+    }))
+    show()
+    setIsSticky(true)
+    setIsHovered(true)
   }
 
   // Global event listeners for closing sticky tooltips
@@ -165,7 +172,7 @@ export function CustomTooltip({ content, children }: CustomTooltipProps) {
   useEffect(() => {
     const handleGlobalDismiss = (event: CustomEvent) => {
       const { except } = event.detail
-      if (except !== tooltipId.current && isSticky) {
+      if (except !== tooltipId.current) {
         setIsSticky(false)
         setIsHovered(false)
       }
@@ -176,70 +183,39 @@ export function CustomTooltip({ content, children }: CustomTooltipProps) {
     return () => {
       document.removeEventListener('dismissAllTooltips', handleGlobalDismiss as EventListener)
     }
-  }, [isSticky])
-
-  // Format content with clickable links
-  const formatContent = (text: string) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g
-    const parts = text.split(urlRegex)
-    
-    return parts.map((part, index) => {
-      if (part.match(urlRegex)) {
-        return (
-          <a 
-            key={index} 
-            href={part} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{ 
-              color: '#60a5fa', 
-              textDecoration: 'underline',
-              cursor: 'pointer'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {part}
-          </a>
-        )
-      }
-      return <span key={index}>{part}</span>
-    })
-  }
+  }, [])
 
   const renderTooltip = () => {
     if (!isVisible || !content || typeof window === 'undefined') return null
+    const { date, entries } = parseContent(content)
 
     return createPortal(
       <div
         id={tooltipId.current}
+        ref={tipRef}
+        role="tooltip"
+        className={`wk-tip ${isSticky ? 'is-sticky' : ''} ${position?.below ? 'is-below' : ''}`}
         style={{
-          position: 'fixed',
-          left: position.x,
-          top: position.y,
-          zIndex: 1000,
-          backgroundColor: isSticky ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.75)',
-          color: 'white',
-          fontFamily: "'Red Hat Display', system-ui, -apple-system, sans-serif",
-          fontSize: '13px',
-          fontWeight: '500',
-          borderRadius: '6px',
-          padding: '12px 16px',
-          boxShadow: isSticky ? '0 4px 20px rgba(0,0,0,0.6)' : '0 4px 20px rgba(0,0,0,0.4)',
-          maxWidth: '300px',
-          minWidth: '150px',
-          pointerEvents: isSticky ? 'auto' : 'none',
-          userSelect: isSticky ? 'text' : 'none',
-          wordWrap: 'break-word',
-          lineHeight: '1.5',
-          border: isSticky ? '2px solid #60a5fa' : 'none',
-        }}
+          left: position?.x ?? -9999,
+          top: position?.y ?? -9999,
+          visibility: position ? 'visible' : 'hidden',
+          '--ax': `${position?.ax ?? 0}px`,
+        } as React.CSSProperties}
       >
-        <div style={{ 
-          whiteSpace: 'pre-wrap', 
-          wordBreak: 'break-word'
-        }}>
-          {formatContent(content)}
-        </div>
+        {date && <div className="wk-tip-date">{date}</div>}
+        {heading && <div className="wk-tip-title">{heading}</div>}
+        {entries.length > 0 && <ul className="wk-tip-list">
+          {entries.map((entry, i) => {
+            const { kind, text } = entryKind(entry)
+            return (
+              <li key={i} className={`wk-tip-entry k-${kind}`}>
+                {entries.length > 1 || kind !== 'personal' ? <span className="wk-tip-kind">{KIND_LABEL[kind]}</span> : null}
+                <span className="wk-tip-text">{formatContent(text)}</span>
+              </li>
+            )
+          })}
+        </ul>}
+        {isSticky && <div className="wk-tip-hint">Pinned · Esc to close</div>}
       </div>,
       document.body
     )
@@ -252,10 +228,7 @@ export function CustomTooltip({ content, children }: CustomTooltipProps) {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
-        style={{
-          cursor: content ? 'pointer' : 'default',
-          display: 'inline-block'
-        }}
+        className="tip-trigger"
       >
         {children}
       </span>

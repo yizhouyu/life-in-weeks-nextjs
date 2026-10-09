@@ -7,16 +7,27 @@ interface CompactToggleProps {
   onToggle: (compact: boolean) => void
 }
 
+/** Standard / Compact segmented control in hairline cells. */
 export function CompactToggle({ isCompact, onToggle }: CompactToggleProps) {
   return (
-    <div className="compact-toggle">
+    <div className="compact-toggle" role="group" aria-label="Grid view">
       <button
         type="button"
-        onClick={() => onToggle(!isCompact)}
-        className={`toggle-button ${isCompact ? 'compact-active' : 'standard-active'}`}
-        title={isCompact ? 'Switch to Standard View' : 'Switch to Compact View (fits entire life on screen)'}
+        className={`seg ${!isCompact ? 'on' : ''}`}
+        aria-pressed={!isCompact}
+        onClick={() => onToggle(false)}
+        title="Standard view: every event spelled out"
       >
-        {isCompact ? '📋 Switch to Standard View' : '🔍 Switch to Compact View'}
+        Standard
+      </button>
+      <button
+        type="button"
+        className={`seg ${isCompact ? 'on' : ''}`}
+        aria-pressed={isCompact}
+        onClick={() => onToggle(true)}
+        title="Compact view: the entire life fits on one screen"
+      >
+        Compact
       </button>
     </div>
   )
