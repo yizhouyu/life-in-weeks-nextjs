@@ -334,7 +334,7 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
         category: "work"
       }
     ],
-    "2026-03-01": [
+    "2026-02-01": [
       {
         headline: "🧭 Became Agent Captain",
         milestone: true,
@@ -347,6 +347,14 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
         headline: "🌉 San Francisco",
         description: "Extended stay in San Francisco",
         category: "travel"
+      }
+    ],
+    "2026-09-01": [
+      {
+        headline: "✨ Joined New AI Bets · AIGC",
+        milestone: true,
+        description: "Working on AI-generated content (AIGC) in Meta's New AI Bets group",
+        category: "work"
       }
     ],
     ...(APP_CONFIG.showLifeExpectancy ? {

@@ -57,9 +57,9 @@ export const APP_CONFIG: AppConfig = {
   showPersonalEventDates: false,    // Hide specific dates for personal events (month/year only)
   
   // Life Expectancy Settings
-  showLifeExpectancy: true,         // Show life expectancy marker for perspective
+  showLifeExpectancy: false,        // Off: no countdown framing (owner preference, 2026-10)
   lifeExpectancyAge: 77,            // US male life expectancy
-  showJapanLifeExpectancy: true,    // Show Japan comparison
+  showJapanLifeExpectancy: false,   // Off: no countdown framing
   japanLifeExpectancyAge: 82,       // Japan male life expectancy
   // Source: https://www.worldometers.info/demographics/life-expectancy/
   // US Life Expectancy 2024: Total 79.25, Male 76.94, Female 81.65

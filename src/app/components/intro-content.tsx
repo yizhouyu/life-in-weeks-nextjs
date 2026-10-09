@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { APP_CONFIG } from '../config/app-config'
 import { EventsData, WeeksConfig } from '../data/life-events'
 
 interface IntroContentProps {
@@ -21,12 +20,12 @@ const fmt = (n: number) => n.toLocaleString('en-US')
 
 export function IntroContent({ lifeEvents, weeksConfig, now }: IntroContentProps) {
   const start = parseLocalDate(weeksConfig.startDate).getTime()
-  const end = new Date(parseLocalDate(weeksConfig.startDate))
-  end.setFullYear(end.getFullYear() + APP_CONFIG.maxAge)
 
   const weeksLived = Math.max(0, Math.floor((now - start) / WEEK_MS))
-  const totalWeeks = Math.round((end.getTime() - start) / WEEK_MS)
-  const pct = Math.min(100, Math.round((weeksLived / totalWeeks) * 100))
+  const trips = Object.entries(lifeEvents).reduce(
+    (n, [date, events]) => n + (parseLocalDate(date).getTime() <= now ? events.filter(e => e.category === 'travel').length : 0),
+    0
+  )
   const milestonesPassed = Object.entries(lifeEvents).filter(
     ([date, events]) => parseLocalDate(date).getTime() <= now && events.some(e => e.milestone)
   ).length
@@ -47,8 +46,7 @@ export function IntroContent({ lifeEvents, weeksConfig, now }: IntroContentProps
         <p className="credits">
           Inspired by <a className="lnk" href="https://waitbutwhy.com/2014/05/life-weeks.html">Wait But Why</a>.
           Adapted from <a className="lnk" href="https://github.com/ginatrapani/life-in-weeks">Gina&apos;s work</a>.
-          Built with <a className="lnk" href="https://rd.me/weeks">Ran Ding&apos;s</a>{' '}
-          <a className="lnk" href="https://github.com/dingran/life-in-weeks-nextjs">open-source code</a>; my fork
+          Built on <a className="lnk" href="https://rd.me/weeks">Ran Ding&apos;s version</a>; my code
           is <a className="lnk" href="https://github.com/yizhouyu/life-in-weeks-nextjs">here</a>.
         </p>
         <div className="btns">
@@ -67,8 +65,8 @@ export function IntroContent({ lifeEvents, weeksConfig, now }: IntroContentProps
           </li>
           <li>
             <span className="i">02</span>
-            <span className="v">{pct}<small>%</small></span>
-            <span className="l">Of {fmt(totalWeeks)} weeks to age {APP_CONFIG.maxAge}</span>
+            <span className="v">{trips}</span>
+            <span className="l">Trips logged on the grid</span>
           </li>
           <li>
             <span className="i">03</span>
