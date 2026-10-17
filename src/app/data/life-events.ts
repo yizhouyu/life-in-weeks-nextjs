@@ -40,6 +40,8 @@ export interface LifeEvent {
   description?: string      // Additional details in rich tooltips
   milestone?: boolean       // For automatic background colors
   category?: EventCategory  // Event category for filtering
+  home?: boolean            // Also show on the yizhouyu.dev home ruler (served by /api/milestones)
+  homeLabel?: string        // Short label for the home ruler; defaults to the headline without its emoji
 }
 
 export type EventsData = Record<string, LifeEvent[]>
@@ -59,12 +61,16 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     [sensitiveDates.birthDate]: [
       {
         headline: "🐣 Born in Shanghai",
+        home: true,
+        homeLabel: "Born in Shanghai",
         category: "personal"
       }
     ],
     "2009-09-01": [
       {
         headline: "🎓 Started at Shanghai Foreign Language School",
+        home: true,
+        homeLabel: "Shanghai Foreign Language School",
         milestone: true,
         category: "education"
       }
@@ -72,6 +78,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2016-08-01": [
       {
         headline: "✈️ Came to US for College",
+        home: true,
+        homeLabel: "Came to the US for college · Cornell",
         milestone: true,
         description: "Started at Cornell University",
         category: "education"
@@ -80,6 +88,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2018-05-01": [
       {
         headline: "💼 Meta Internship",
+        home: true,
+        homeLabel: "Meta intern",
         description: "Interned at Meta's New York City Office",
         category: "work"
       }
@@ -87,6 +97,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2019-06-01": [
       {
         headline: "💼 Point72 Internship",
+        home: true,
+        homeLabel: "Point72 intern",
         description: "Summer intern on the Market Intelligence team.",
         category: "work"
       }
@@ -94,6 +106,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2020-05-01": [
       {
         headline: "🎓 Graduated from Cornell University",
+        home: true,
+        homeLabel: "Cornell M.Eng.",
         milestone: true,
         description: "Bachelor's and Master's degrees",
         category: "education"
@@ -102,6 +116,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2020-07-01": [
       {
         headline: "💼 Started at Meta full-time as a Software Engineer",
+        home: true,
+        homeLabel: "Meta, full-time",
         milestone: true,
         description: "Joined Applied Privacy Technology Team",
         category: "work"
@@ -124,6 +140,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2022-01-06": [
       {
         headline: "🎬 Started a YouTube channel",
+        home: true,
+        homeLabel: "Started a YouTube channel",
         description: "Yizhou的一周. The first video was about my job at Meta; it slowly became mostly travel vlogs: https://www.youtube.com/@yizhou8888",
         category: "personal"
       }
@@ -138,6 +156,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2022-08-01": [
       {
         headline: "🔬 Joined Experimentation Platform Team",
+        home: true,
+        homeLabel: "Experimentation Platform",
         milestone: true,
         description: "Switched to the Experimentation Platform team at Meta",
         category: "work"
@@ -153,6 +173,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2022-09-27": [
       {
         headline: "💕 Started dating my future wife",
+        home: true,
+        homeLabel: "Started dating my future wife",
         category: "personal"
       }
     ],
@@ -257,6 +279,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2024-08-02": [
       {
         headline: "🐱 Adopted Humi",
+        home: true,
+        homeLabel: "Adopted Humi",
         description: "A tabby kitten, now with her own Instagram: https://www.instagram.com/little.humi/",
         category: "personal"
       }
@@ -313,6 +337,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2025-07-30": [
       {
         headline: "💍 Married at City Hall",
+        home: true,
+        homeLabel: "Married",
         category: "personal"
       }
     ],
@@ -375,6 +401,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2025-01-01": [
       {
         headline: "📊 Joined AI for Analytics",
+        home: true,
+        homeLabel: "AI for Analytics",
         milestone: true,
         description: "Built AI agents to boost productivity in analytics at Meta",
         category: "work"
@@ -383,6 +411,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2025-06-01": [
       {
         headline: "🧪 Joined AI for Experimentation",
+        home: true,
+        homeLabel: "AI for Experimentation",
         milestone: true,
         description: "Using AI to help Meta make better and faster decisions through experimentation",
         category: "work"
@@ -391,6 +421,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2026-02-01": [
       {
         headline: "🧭 Became Agent Captain",
+        home: true,
+        homeLabel: "Agent Captain",
         milestone: true,
         description: "Leading the shift to AI-native workflows at Meta",
         category: "work"
@@ -413,6 +445,8 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2026-09-01": [
       {
         headline: "✨ Joined New AI Bets · AIGC",
+        home: true,
+        homeLabel: "AIGC · New AI Bets",
         milestone: true,
         description: "Working on AI-generated content (AIGC) in Meta's New AI Bets group",
         category: "work"

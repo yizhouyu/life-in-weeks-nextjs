@@ -191,6 +191,10 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
 - `description`: Tooltip details with auto-linked URLs (optional).
 - `milestone`: Triggers automatic color generation (optional).
 
+### Home ruler (yizhouyu.dev)
+
+Events with `home: true` (and an optional short `homeLabel`) also appear on the yizhouyu.dev home page ruler, served month-level by `/api/milestones`. Add or remove the flag here; the main site picks it up without a redeploy.
+
 ### Privacy Settings
 
 Control date visibility in [app-config.ts](src/app/config/app-config.ts):
