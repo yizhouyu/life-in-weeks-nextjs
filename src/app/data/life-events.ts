@@ -84,6 +84,13 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
         category: "work"
       }
     ],
+    "2019-06-01": [
+      {
+        headline: "💼 Point72 Internship",
+        description: "Summer intern on the Market Intelligence team.",
+        category: "work"
+      }
+    ],
     "2020-05-01": [
       {
         headline: "🎓 Graduated from Cornell University",
@@ -105,6 +112,20 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
         headline: "👨‍🏫 Hosted Kensal Ramos",
         description: "As intern manager at Meta",
         category: "work"
+      }
+    ],
+    "2022-01-01": [
+      {
+        headline: "🏂 Belleayre",
+        description: "Snowboarding at Belleayre Mountain in the Catskills.",
+        category: "travel"
+      }
+    ],
+    "2022-01-06": [
+      {
+        headline: "🎬 Started a YouTube channel",
+        description: "Yizhou的一周. The first video was about my job at Meta; it slowly became mostly travel vlogs: https://www.youtube.com/@yizhou8888",
+        category: "personal"
       }
     ],
     "2022-05-01": [
@@ -129,66 +150,72 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
         category: "travel"
       }
     ],
+    "2022-09-27": [
+      {
+        headline: "💕 Started dating my future wife",
+        category: "personal"
+      }
+    ],
     "2022-10-19": [
       {
         headline: "🍂 Boston",
-        description: "Travel to Boston",
+        description: "Walked all 16 stops of the Freedom Trail.",
         category: "travel"
       }
     ],
     "2022-11-23": [
       {
         headline: "🏖️ Miami",
-        description: "Travel to Miami",
+        description: "Took the 28-hour Amtrak sleeper down from New York, then tried wakeboarding for the first time.",
         category: "travel"
       }
     ],
     "2022-12-30": [
       {
         headline: "🏂 Vermont Snowboarding",
-        description: "Snowboarding at Stowe and Killington",
+        description: "Stowe and Killington over New Year's.",
         category: "travel"
       }
     ],
     "2023-02-18": [
       {
         headline: "🎨 Beacon",
-        description: "Travel to Beacon, NY",
+        description: "Dia Beacon and Main Street.",
         category: "travel"
       }
     ],
     "2023-04-07": [
       {
         headline: "🌳 Charleston & Savannah",
-        description: "Travel to Charleston and Savannah",
+        description: "Rainbow Row, Magnolia Plantation, and lunch at Mrs. Wilkes'.",
         category: "travel"
       }
     ],
     "2023-04-26": [
       {
-        headline: "🐻 Ithaca",
-        description: "Travel to Ithaca, NY",
+        headline: "🐻 Back to Ithaca",
+        description: "Back at Cornell: the dining halls, North Campus, waterfalls and wineries.",
         category: "travel"
       }
     ],
     "2023-06-10": [
       {
         headline: "💼 Bay Area",
-        description: "Travel to Bay Area",
+        description: "Meta and Apple HQs, Lake Tahoe, and the Golden Gate at sunset.",
         category: "travel"
       }
     ],
     "2023-09-02": [
       {
         headline: "🏔️ Seattle & Portland",
-        description: "Travel to Seattle and Portland",
+        description: "Wild orcas off San Juan Island and a sunrise hike at Mount Rainier.",
         category: "travel"
       }
     ],
     "2023-10-20": [
       {
         headline: "🍁 DC & Shenandoah National Park",
-        description: "Travel to DC and Shenandoah National Park",
+        description: "Fall foliage in Shenandoah and Luray Caverns.",
         category: "travel"
       }
     ],
@@ -202,14 +229,14 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2023-12-17": [
       {
         headline: "🍹 Hollywood / Fort Lauderdale",
-        description: "Travel to Hollywood and Fort Lauderdale, Florida",
+        description: "The guitar-shaped Hard Rock Hotel and its light show.",
         category: "travel"
       }
     ],
     "2024-03-15": [
       {
         headline: "🤠 Texas",
-        description: "Travel to Texas",
+        description: "Dallas, San Antonio, Austin",
         category: "travel"
       }
     ],
@@ -222,29 +249,36 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     ],
     "2024-07-03": [
       {
-        headline: "🚣 Adirondack",
-        description: "Travel to Adirondack",
+        headline: "🚣 Adirondacks",
+        description: "Lake Placid on July 4th, a 7-hour hike to Indian Head, and a day rafting the Hudson River Gorge.",
         category: "travel"
+      }
+    ],
+    "2024-08-02": [
+      {
+        headline: "🐱 Adopted Humi",
+        description: "A tabby kitten, now with her own Instagram: https://www.instagram.com/little.humi/",
+        category: "personal"
       }
     ],
     "2024-10-12": [
       {
         headline: "📒 New Haven",
-        description: "Travel to New Haven, CT",
+        description: "Toured Yale",
         category: "travel"
       }
     ],
     "2024-11-28": [
       {
         headline: "🐠 Puerto Rico",
-        description: "Travel to Puerto Rico",
+        description: "El Yunque, Flamenco Beach on Culebra, and the bioluminescent bay on Vieques.",
         category: "travel"
       }
     ],
     "2024-12-30": [
       {
         headline: "🌵 Arizona",
-        description: "Travel to Arizona",
+        description: "New Year's in Sedona, then Antelope Canyon, Meteor Crater and the saguaros around Tucson.",
         category: "travel"
       }
     ],
@@ -258,21 +292,34 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
     "2025-04-04": [
       {
         headline: "🪨 Utah",
-        description: "Travel to Utah",
+        description: "Arches, Canyonlands, Bryce and Zion in five days, ending in Las Vegas.",
         category: "travel"
+      }
+    ],
+    "2025-06-05": [
+      {
+        headline: "🐻 Cornell Reunion",
+        description: "Back in Ithaca for my 5-year reunion.",
+        category: "personal"
       }
     ],
     "2025-07-04": [
       {
         headline: "🏔️ Colorado",
-        description: "Travel to Colorado",
+        description: "Sky Pond in Rocky Mountain National Park, Trail Ridge Road and Pikes Peak.",
         category: "travel"
+      }
+    ],
+    "2025-07-30": [
+      {
+        headline: "💍 Married at City Hall",
+        category: "personal"
       }
     ],
     "2025-08-29": [
       {
         headline: "🧊 Alaska",
-        description: "Travel to Alaska",
+        description: "Landed on a glacier by helicopter, watched bears catch salmon at Brooks Falls, and fished for halibut out of Seward.",
         category: "travel"
       }
     ],
@@ -283,38 +330,45 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
         category: "achievement"
       }
     ],
+    "2025-10-18": [
+      {
+        headline: "🐺 Princeton and a wolfdog farm",
+        description: "Howling Woods Farm, then Princeton in the fall.",
+        category: "travel"
+      }
+    ],
     "2025-11-26": [
       {
         headline: "🦭 Tampa",
-        description: "Travel to Tampa, Florida",
+        description: "Wild manatees at Crystal River and the Ringling in Sarasota.",
         category: "travel"
       }
     ],
     "2025-12-12": [
       {
         headline: "🌮 New Mexico",
-        description: "Travel to New Mexico",
+        description: "Cliff dwellings at Bandelier, Chaco Canyon, White Sands, Carlsbad Caverns and Roswell.",
         category: "travel"
       }
     ],
     "2025-12-21": [
       {
         headline: "⛲ Southern California",
-        description: "Travel to Southern California (San Diego, Palm Springs, LA)",
+        description: "Christmas in Joshua Tree, sea lions in La Jolla, and a last sunset in Malibu.",
         category: "travel"
       }
     ],
     "2026-03-15": [
       {
         headline: "🏝️ US Virgin Islands",
-        description: "Travel to the US Virgin Islands",
+        description: "Snorkeled with sea turtles off St. John.",
         category: "travel"
       }
     ],
     "2026-05-15": [
       {
         headline: "🌺 Hawaii",
-        description: "Travel to Hawaii",
+        description: "Borrowed a shelter dog for a day on Kauai.",
         category: "travel"
       }
     ],
@@ -349,12 +403,32 @@ export function createLifeEvents(sensitiveDates: SensitiveDates, derivedConfig: 
         category: "travel"
       }
     ],
+    "2026-07-03": [
+      {
+        headline: "🌲 Sequoia & Kings Canyon",
+        description: "General Sherman, a drive through Tunnel Log, and Cat Haven on the way.",
+        category: "travel"
+      }
+    ],
     "2026-09-01": [
       {
         headline: "✨ Joined New AI Bets · AIGC",
         milestone: true,
         description: "Working on AI-generated content (AIGC) in Meta's New AI Bets group",
         category: "work"
+      }
+    ],
+    "2026-09-05": [
+      {
+        headline: "🇲🇽 Mexico City",
+        category: "travel"
+      }
+    ],
+    "2026-10-10": [
+      {
+        headline: "🏜️ Orange County, Death Valley & Las Vegas",
+        description: "Orange County and the coast at Laguna Niguel, then a drive through Death Valley to Las Vegas.",
+        category: "travel"
       }
     ],
     ...(APP_CONFIG.showLifeExpectancy ? {
