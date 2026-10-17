@@ -62,7 +62,7 @@ Don't add `src/app/favicon.ico` or `icon.*` files; the file convention would ove
 
 **Theme**: light by default, dark follows the system and can be toggled. Same semantics as the main site (same origin): `data-theme="light|dark"` on `<html>`, persisted in `localStorage['theme']`, with `?theme=light|dark` as an override for screenshots. A tiny inline script in [layout.tsx](src/app/layout.tsx) applies it before paint; [theme-toggle.tsx](src/app/components/theme-toggle.tsx) is the button.
 
-**Copy**: don't mention yzyzy.dev in visible copy.
+**Copy**: never link to yzyzy.dev (the old second domain, released Oct 2026); yizhouyu.dev is the only domain.
 
 ## Architecture Overview
 
